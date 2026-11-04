@@ -77,11 +77,28 @@ function existsExact(rel) {
 const isFile = (rel) => files.includes(rel);
 
 // ---------- The headings of a Markdown file, as GitHub makes the anchors ----------
+/** Takes the HTML tags out of a heading in one pass (`<code>x</code>` becomes `x`). A `<` with no `>` after it, and `<>`, are only text. */
+function stripTags(text) {
+  let out = '';
+  let from = 0;
+  while (from < text.length) {
+    const open = text.indexOf('<', from);
+    if (open === -1) return out + text.slice(from);
+    const close = text.indexOf('>', open + 1);
+    if (close === -1) return out + text.slice(from);
+    if (close === open + 1) {
+      out += text.slice(from, close + 1);
+    } else {
+      out += text.slice(from, open);
+    }
+    from = close + 1;
+  }
+  return out;
+}
+
 function baseSlug(heading) {
-  return heading
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/<[^>]+>/g, '')
+  const plain = heading.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+  return stripTags(plain)
     .replace(/[`*~]/g, '')
     .trim()
     .toLowerCase()
@@ -258,7 +275,7 @@ for (const file of markdown) {
 const index = tryText('docs/README.md');
 for (const file of markdown.filter((f) => /^docs\/[^/]+\.md$/.test(f) && f !== 'docs/README.md')) {
   const name = file.slice('docs/'.length);
-  if (!new RegExp(`\\]\\(${name.replace(/\./g, '\\.')}(#[^)]*)?\\)`).test(index)) fail('docs/README.md', `does not link to ${file}`);
+  if (!index.includes(`](${name})`) && !index.includes(`](${name}#`)) fail('docs/README.md', `does not link to ${file}`);
 }
 if (!linksOf('README.md').some(({ target }) => /^docs\/README\.md(#.*)?$/.test(target))) fail('README.md', 'does not link to docs/README.md');
 
