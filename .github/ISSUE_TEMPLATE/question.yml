@@ -29,6 +29,6 @@ body:
     attributes:
       label: Your setup
       description: Helper version, operating system, browser, and the kind of place (FTP, FTPS, SFTP).
-      placeholder: 'Helper 1.0.0, Windows 11, Chrome 149, SFTP'
+      placeholder: 'Helper 1.1.0, Windows 11, Chrome 149, SFTP'
     validations:
       required: true

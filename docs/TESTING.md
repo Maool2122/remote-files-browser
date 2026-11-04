@@ -16,7 +16,7 @@ This page says what the tests are, what each one proves, how to run one alone, h
 
 | Kind | Where it is | Run it with | Needs |
 | --- | --- | --- | --- |
-| Go tests of the helper | `helper/*_test.go` (9 files), with in-memory test servers in `helper/testservers/` and `helper/testserver/` | `cd helper && go test -count=1 ./...` | Go |
+| Go tests of the helper | `helper/*_test.go` (11 files), with in-memory test servers in `helper/testservers/` and `helper/testserver/` | `cd helper && go test -count=1 ./...` | Go |
 | `go vet` | all of `helper/` | `cd helper && go vet ./...` | Go |
 | Formatting | all of `helper/` | `cd helper && gofmt -l .` (it prints nothing when all is well) | Go |
 | The six builds | `helper/build.mjs` | `node helper/build.mjs` | Go, Node.js |
@@ -36,6 +36,7 @@ The tests start **their own servers on the local computer** (`helper/testservers
 | `sftp_test.go` | SFTP: password flow, wrong password, key files (with and without a passphrase), parallel transfers, an unreachable server. |
 | `flow_test.go` | The walk-through that every protocol must pass (the function `exercise`; the FTP and the SFTP tests both run it): nested folders, uploads (an empty file, 2.5 MB, names with accents and spaces), listing, `stat` of a file, a folder and a missing path, download whole and from the middle, a missing file giving an error with words, rename, delete of a file and of a folder, an upload cancelled half way leaving nothing behind, and the session still working after that. |
 | `install_test.go` | The registration: only the listed extensions, copy + register + uninstall, earlier extension addresses are kept, only valid addresses are trusted from an old file, the text of `status` and `install`, `--no-copy`. |
+| `sites_test.go`, `sites_windows_test.go` | The import of saved servers (helper 1.1.0): sample lists in the formats of FileZilla, WinSCP (a file and, on Windows, a registry branch of its own that the test makes and removes) and Cyberduck; every kind of server, folders and groups, the start folder, broken, unreadable and too large files, the limits, the `sites` message through the real framed protocol, and that **no password, key or key file name is ever in the answer** (the sample lists hold made-up ones on purpose, and a test fails when one of them comes out). |
 | `harness_test.go`, `servers_test.go` | Helpers: a client that speaks the real framed protocol to the helper, and the test servers. |
 | `install_windows_test.go`, `install_other_test.go` | The install tests never touch the real registration. On Windows the registration points at a registry branch of its own (`Software\RocuoHelperTest-<number>`) that is removed afterwards; on macOS and Linux a temporary home folder is used. |
 
@@ -43,14 +44,15 @@ The WebDAV test server in `helper/testservers/` is for trying other clients: the
 
 ## The last full run
 
-On 2026-11-04, on Windows 11 with Go 1.27.0:
+On 2026-11-04, on Windows 11 with Go 1.27.3, for helper 1.1.0:
 
 | Check | Result |
 | --- | --- |
 | `gofmt -l .` | Printed nothing. |
 | `go vet ./...` | Clean. It is also clean when run for the other five systems the helper is built for (Windows on ARM, macOS and Linux, Intel/AMD and ARM), which type-checks the code and the tests of each: **nothing was run there**. |
-| `go test -count=1 ./...` | **37 tests passed, none failed, none skipped** (7 to 12 seconds). |
-| `node helper/build.mjs` | All six programs were built. Their SHA-256 checksums are the same as those of the files on the download page of the helper (built with the same Go version, 1.27.0). |
+| `go test -count=1 ./...` | **51 tests passed, none failed, none skipped** (about 10 seconds). |
+| `node helper/build.mjs` | All six programs were built from the files of this repository. Their SHA-256 checksums are the same as those of the files on the download page of the helper (built with the same Go version, 1.27.3). |
+| `govulncheck ./...` | The vulnerability database was from 2026-11-02. Your code is affected by 0 vulnerabilities, and the program imports no package with one; one advisory is in a library that the helper requires but does not call ([helper/SECURITY.md](../helper/SECURITY.md#known-limits)). |
 | `node tools/check-docs.mjs`, `node tools/check-scope.mjs` | Both pass. |
 
 The same commands run on GitHub's computers on every change (below). The macOS and Linux results of those runs are in the Actions tab of the repository.
@@ -84,7 +86,8 @@ Test what the person sees, and the failing cases too (a wrong password, a name t
 
 ## What is not tested by a script
 
-- **The extension.** It is closed source. The maintainers run their own tests of it with this helper in a real Chrome against the test servers, on Windows, before a release; those tests are not in this repository. What the extension and the helper say to each other is written down in [PROTOCOL.md](../helper/docs/PROTOCOL.md), and the Go tests here check the helper's side of it.
+- **The extension.** It is closed source. The maintainers run their own tests of it with this helper in a real Chrome against the test servers, on Windows; those tests are not in this repository, and they were last run with helper 1.0.0 (2026-10-28), not repeated for 1.1.0. What the extension and the helper say to each other is written down in [PROTOCOL.md](../helper/docs/PROTOCOL.md), and the Go tests here check the helper's side of it.
+- **The import of saved servers** (helper 1.1.0). It was tried with sample lists in the formats of FileZilla, WinSCP and Cyberduck, and on Windows with the compiled program run through its pipes on sample files and on a test registry key. It has **never been run against the lists of a real installation** of those programs, and never on macOS or Linux, where the lists are in other places ([PROTOCOL.md](../helper/docs/PROTOCOL.md#sites-helper-110-and-newer)).
 - The helper on **macOS, Linux and Windows on ARM**: built and vetted, never run by the maintainers ([PLATFORMS.md](PLATFORMS.md)).
 - **Windows 10.** The tests were run on Windows 11.
 - **Real servers of a company.** The FTP, FTPS and SFTP tests use test servers made from other people's libraries (an FTP server library and a Go SSH library). Other servers can still answer differently: report one that does ([SUPPORT.md](../SUPPORT.md)).

@@ -23,9 +23,11 @@ The **helper program** is a program per system, and that is where the gaps are: 
 
 The helper programs are **not signed or notarized** on any system yet ([VERIFYING-DOWNLOADS.md](VERIFYING-DOWNLOADS.md)).
 
+The **import of saved servers** (helper 1.1.0, [PROTOCOL.md](../helper/docs/PROTOCOL.md#sites-helper-110-and-newer)) is a separate thing to try. It reads the lists that FileZilla (every system), Cyberduck (Windows and macOS) and WinSCP (Windows) keep for the person. It was tried with sample lists, on Windows only, and has **never been run against a real installation** of those programs on any system.
+
 ## What has been checked
 
-- **Windows 11, by the maintainers:** `go vet` and the Go tests of the helper ([TESTING.md](TESTING.md#the-last-full-run)), and the maintainers' own tests of the extension with this helper in a real Chrome against real FTP, FTPS, SFTP and WebDAV test servers. The extension is closed source, so those tests are not in this repository.
+- **Windows 11, by the maintainers:** `go vet` and the Go tests of the helper ([TESTING.md](TESTING.md#the-last-full-run)), and, for helper 1.0.0 (2026-10-28), the maintainers' own tests of the extension with this helper in a real Chrome against FTP, FTPS, SFTP and WebDAV test servers. The extension is closed source, so those tests are not in this repository, and they were not repeated for 1.1.0.
 - **Linux and macOS, by GitHub Actions:** the workflow [`ci.yml`](../.github/workflows/ci.yml) runs the helper's `go vet` and `go test` on a Linux and a macOS computer as **experimental** jobs (a failure there does not turn the whole run red). Look at the latest runs in the Actions tab of the repository to see whether they are green. Even a green run proves only that the tests pass there; it does not replace starting the helper from a real Chrome on a real computer.
 - **All systems, the builds:** `node helper/build.mjs` builds the six programs from any computer (the helper is pure Go with no C code), and CI does that on every change.
 
@@ -57,6 +59,7 @@ If something fails, [helper/docs/TROUBLESHOOTING.md](../helper/docs/TROUBLESHOOT
 
 - **Run the helper's Go tests** on macOS, Linux, Windows 10 or Windows on ARM and send the result: `cd helper && go test -count=1 ./...`. This is the quickest useful report; it takes a minute.
 - **Check the other browsers.** The helper registers itself for Chrome, Edge, Brave and Chromium (the places are in [helper/docs/INSTALLING.md](../helper/docs/INSTALLING.md)). Tell us which of them really start it on your system.
+- **Try the import of saved servers** if you use FileZilla, WinSCP or Cyberduck. Install the helper, open the start page of the extension, press **Import your saved servers**, then **Look for saved servers**, and tell us which of your servers were found and whether the name, the address, the port, the user and the folder were right. Describe an entry that was read wrong; never send the list file, because it can hold passwords.
 - **Bring a server that answers in an odd way.** Every FTP, FTPS and SFTP server differs a little. A failing case, described without private data (what the server answered), becomes a test in `helper/` and keeps the next version from breaking on it.
 - **Signing and notarization.** A signed Windows program (Authenticode) and a signed and notarized Mac program need the publisher's certificates. The code can be prepared by anyone (a signing step in the release workflow that reads its secrets from a protected GitHub environment); the secrets stay with the publisher. Open an issue to discuss.
 - **A package for your system.** A Homebrew formula, a Scoop or winget manifest or a distribution package that installs the helper from the release files and their checksums is welcome, as a separate repository or a pull request that adds the recipe.

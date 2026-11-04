@@ -6,7 +6,7 @@ A Chrome extension can only make web requests. FTP, FTPS and SFTP need other kin
 
 This folder is the whole program: the source, its tests, its test servers and its documents. Nothing in it needs the rest of the extension to be read, built or unit-tested. (The extension is closed source: the tests that run it in a real Chrome belong to it and are not in this repository; [docs/BUILDING.md](docs/BUILDING.md) says which.)
 
-- Version `1.0.0`, message version (protocol) `1`.
+- Version `1.1.0`, message version (protocol) `1`.
 - Written in Go. One file per system, about 7 MB on Windows, no other software to install.
 - Licence: [MIT](LICENSE). The libraries it uses have their own licences: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -85,12 +85,14 @@ The address is the long ID on the card of the extension in `chrome://extensions`
 - **For every type:** list a folder (in batches of 500 names, so a big folder starts to show quickly), read and write files, resume a download from a byte position, make folders, rename, delete (folders with everything inside; on SFTP a link is removed, never followed), cancel at any moment.
 - **Trust.** A certificate that the computer trusts passes. Any other certificate, and any SSH host key that is not on the list the extension sent, is **stopped** with a `trust` error that carries the SHA-256 fingerprint. The extension shows it and asks you. The program never decides alone and keeps no list of its own.
 - **Passwords.** The extension sends the password with the `open` request. The program keeps it in memory for that connection only and writes it nowhere.
+- **Saved servers of other programs (since 1.1.0).** When the extension asks, and only then (the person presses a button in the extension), the program reads the lists that **FileZilla**, **WinSCP** and **Cyberduck** keep for the same person on the same computer, and hands back names, server addresses, ports, user names and start folders, so the extension can offer them as connections ([docs/PROTOCOL.md](docs/PROTOCOL.md#sites-helper-110-and-newer), [sites.go](sites.go)). It **never reads a password or a key file** from them (the code has no field for either), changes nothing in those programs, and looks nowhere else. FTP, FTPS and SFTP entries only; WebDAV, cloud storage and SCP entries are counted and left out.
 
 ## Safety, in short
 
 - Only the listed extensions can start it (Chrome checks that, not this program).
 - It listens on no port and writes no file except its own copy and its registration.
 - It talks to the servers you open and to no one else.
+- It reads a local file only for a reason the person gave: the private key file whose path they typed, and, when they press **Import saved servers** in the extension, the saved-server lists named above (never their passwords or key files).
 - It never decides about trust: a new or changed certificate or host key goes back to the person.
 
 The full picture and how to report a problem: [SECURITY.md](SECURITY.md).

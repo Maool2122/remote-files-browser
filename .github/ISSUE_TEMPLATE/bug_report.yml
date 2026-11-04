@@ -19,6 +19,7 @@ body:
       label: Which part does not work?
       options:
         - The helper program (install, start, FTP, FTPS or SFTP)
+        - The import of saved servers (FileZilla, WinSCP or Cyberduck)
         - The build, the tests or the release files
         - The documents
         - I do not know
@@ -40,7 +41,7 @@ body:
     attributes:
       label: Helper version
       description: Run `rocuo-files-helper version` (on Windows add `| Out-String` in PowerShell), or press Test the helper in the Settings of the extension.
-      placeholder: '1.0.0'
+      placeholder: '1.1.0'
     validations:
       required: true
   - type: input
@@ -48,7 +49,7 @@ body:
     attributes:
       label: Extension version (if you use it with the extension)
       description: Open chrome://extensions and look at the version of Remote Files Browser FTP.
-      placeholder: '1.1.0'
+      placeholder: '1.2.0'
   - type: dropdown
     id: system
     attributes:

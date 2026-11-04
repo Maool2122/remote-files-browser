@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	version         = "1.0.0"
+	version         = "1.1.0"
 	protocolVersion = 1
 
 	// One "data" message carries at most this many bytes of a download (before base64). Chrome accepts 1 MB per message.
@@ -223,6 +223,9 @@ func (s *server) handle(ctx context.Context, m *message, op *operation) (map[str
 			b.close()
 		}
 		return nil, nil
+	case "sites":
+		// The saved servers of FileZilla, WinSCP and Cyberduck (read only, never a password): see sites.go.
+		return map[string]any{"sources": discoverSites(currentSiteLocations())}, nil
 	}
 
 	b, err := s.session(m.Session)

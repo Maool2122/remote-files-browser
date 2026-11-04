@@ -33,6 +33,7 @@ By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
    - **No server of ours, no account, no tracking, no analytics.**
    - **No remote code.** Nothing is downloaded and run.
    - **A password is never in an address, a log or plain text.** It stays in memory for that connection.
+   - **Other programs' saved servers are read only when the person asks, read only, and never with a password or a key.** Names, addresses, ports, user names and start folders only (`helper/sites.go`).
    - **Trust is asked, never assumed.** A new or changed certificate or host key goes back to the person.
    - **No new library without a strong reason:** every one is code that runs with the person's rights.
 3. **No secrets in the repository.** Not in code, tests, documents, screenshots or comments: no password, key, token, private address, real server name or personal name. The test servers use made-up logins (`alice` / `secret`).

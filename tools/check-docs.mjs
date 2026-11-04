@@ -227,13 +227,14 @@ const said = (rel, pattern, what, expected) => {
 if (helperVersion) {
   said('README.md', /Version `([^`]+)`, message version/, 'the helper version', helperVersion);
   said('helper/README.md', /^- Version `([^`]+)`/m, 'the helper version', helperVersion);
-  said('helper/docs/PROTOCOL.md', /goes with helper version `([^`]+)`/, 'the helper version', helperVersion);
+  // "Protocol **1** is used by every helper version so far (`1.0.0` and `1.1.0`)": the last version named is the newest one.
+  said('helper/docs/PROTOCOL.md', /^Protocol \*\*\d+\*\*[^\n]*`(\d+\.\d+\.\d+)`[^`\n]*$/m, 'the newest helper version', helperVersion);
   said('helper/docs/INSTALLING.md', /Remote Files Browser helper (\d+\.\d+\.\d+) \(/, 'the helper version in the example', helperVersion);
 }
 if (protocol) {
   said('README.md', /message version \(protocol\) `([^`]+)`/, 'the protocol', protocol);
   said('helper/README.md', /message version \(protocol\) `([^`]+)`/, 'the protocol', protocol);
-  said('helper/docs/PROTOCOL.md', /^Protocol \*\*(\d+)\*\* goes with/m, 'the protocol', protocol);
+  said('helper/docs/PROTOCOL.md', /^Protocol \*\*(\d+)\*\* (?:goes with|is used by)/m, 'the protocol', protocol);
 }
 
 // ---------- Placeholders ----------

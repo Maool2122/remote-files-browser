@@ -2,7 +2,7 @@
 
 ## What you need
 
-- **Go 1.26 or newer** (<https://go.dev/dl/>). `go.mod` says `go 1.26.0`. **Use the newest patch release of Go to build a program that you run or hand to others**: the Go standard library (TLS, certificates) is part of the program, and older patch releases have known security fixes ([SECURITY.md](../SECURITY.md#known-limits)).
+- **Go 1.26 or newer** (<https://go.dev/dl/>). `go.mod` says `go 1.26.0`; the release files of version 1.1.0 were built with Go 1.27.3. Build releases with the newest Go: an older one (1.27.0) puts two known advisories of the Go standard library into the program ([SECURITY.md](../SECURITY.md)).
 - **Node.js** only for `build.mjs`, the small script that builds for every system and writes the checksums. You can use `go build` directly instead.
 - Nothing else. The program is pure Go (`CGO_ENABLED=0`), so there is no C compiler, and every system can be built from any system.
 
@@ -40,7 +40,7 @@ go build -trimpath -buildvcs=false -o rocuo-files-helper .
 
 ### The same bytes
 
-The build does not put the time, your folder names or a commit stamp into the program, so the same source and the same Go version give the same file. This was checked with Go 1.27.0, on Windows, twice. On 2026-10-28 the two Windows programs built from the published source ZIP, in another folder, had the same SHA-256 as the published files. On 2026-11-04 **all six programs** (Windows, macOS and Linux, Intel/AMD and ARM) built again from a fresh copy of the files of the repository, in another folder, had the same SHA-256 and the same size as the files published at <https://rocuo.com/remote-files/ftp-helper/>. Unpack the source ZIP, run `node build.mjs` (or `node build.mjs windows`) and compare with `SHA256SUMS.txt` to check what you run. Both checks were made on one Windows computer, which also cross-compiled the macOS and Linux programs; a build on a Mac or on a Linux computer has not been compared, and another Go version gives other files.
+The build does not put the time, your folder names or a commit stamp into the program, so the same source and the same Go version give the same file. This was checked on Windows. For version 1.0.0 (Go 1.27.0): on 2026-10-28 the two Windows programs built from the source ZIP, in another folder, had the same SHA-256 as the published files, and on 2026-11-04 all six programs did. For version 1.1.0 (Go 1.27.3): on 2026-11-04 the Windows 64-bit program built twice had the same SHA-256 both times, and **all six programs** (Windows, macOS and Linux, Intel/AMD and ARM) built from the unpacked source ZIP of 1.1.0, in another folder, had the same SHA-256 and the same size as the files published at <https://rocuo.com/remote-files/ftp-helper/>. Unpack the source ZIP, run `node build.mjs` (or `node build.mjs windows`) and compare with `SHA256SUMS.txt` to check what you run. These checks were made on one Windows computer, which also cross-compiled the macOS and Linux programs; a build on a Mac or on a Linux computer has not been compared, and another Go version gives other files.
 
 ### Not signed
 
@@ -62,6 +62,7 @@ The tests start **their own servers on the local computer** (`testservers/`, `12
 | `sftp_test.go` | SFTP: password flow, wrong password, key files (with and without a passphrase), parallel transfers, an unreachable server. |
 | `flow_test.go` | The walk-through that every protocol must pass (FTP and SFTP both run it): nested folders (and again), uploads (an empty file, 2.5 MB, names with accents and spaces), listing, `stat` of a file, a folder and a missing path, download whole and from the middle, a missing file giving an error with words, rename, delete of a file and of a folder, an upload cancelled half way leaving nothing behind, and the session still working after that. |
 | `install_test.go` | The registration: only the listed extensions, copy + register + uninstall, **earlier extension addresses are kept**, only valid addresses are trusted from an old file, the text of `status` and `install`, `--no-copy`. |
+| `sites_test.go`, `sites_windows_test.go` | The saved-server import: sample lists in the formats of FileZilla, WinSCP (a file and, on Windows, a registry branch of its own) and Cyberduck; every kind of server, folders and groups, the start folder, broken, unreadable and too large files, the limits, the `sites` message, and that no password, key or key file name is ever in the answer. |
 | `harness_test.go`, `servers_test.go` | Helpers: a client that speaks the real framed protocol to the server, and the test servers. |
 
 The install tests never touch the real registration. On Windows `install_windows_test.go` points the registration at a registry branch of its own (`Software\RocuoHelperTest-<number>`) and removes it afterwards; on macOS and Linux `install_other_test.go` uses a temporary home folder.
@@ -79,7 +80,7 @@ starts FTP, FTP with explicit TLS, FTP with implicit TLS, FTP that allows only t
 The extension is closed source, so its own tests are not in this repository. They run the built extension in a real Chrome (Chrome for Testing) against this helper and the test servers above, and the maintainers run them on Windows before a release. What the extension and the helper say to each other is written down in [PROTOCOL.md](PROTOCOL.md), and the Go tests in this folder check the helper's side of it.
 ## What has and has not been run
 
-- **Windows:** built; `go vet ./...` is clean and the 37 Go tests pass (2026-10-28, run with `go test -count=1 ./...` so that nothing comes from the cache); the maintainers' own tests of the extension with this helper in a real Chrome (53 and 28 checks; they are not in this repository) pass in Chrome for Testing 149 and in 156.
+- **Windows:** built; `go vet ./...` is clean and the 51 Go tests of version 1.1.0 pass (2026-11-04, Go 1.27.3, run with `go test -count=1 ./...` so that nothing comes from the cache). The maintainers' own tests of the extension with this helper in a real Chrome (53 and 28 checks; they are not in this repository) passed in Chrome for Testing 149 and in 156 on 2026-10-28 with version 1.0.0; they were **not run for 1.1.0** (they refuse to run when a helper is already registered on the computer, and one was). The saved-server import was run through the helper's own pipes with the compiled Windows program (a test of the maintainers' own, not in this repository), and the extension's import window in a real Chrome against a stand-in for the helper.
 - **macOS and Linux:** the programs **compile**, and `go vet ./...` passes for both (`GOOS=linux`, `GOOS=darwin`, `CGO_ENABLED=0`). **Nothing has been run on those systems**: not the Go tests, not the registration code (`install_other.go`), not a start from Chrome. Before a release, run on a Mac and a Linux computer at least `go test ./...`, `install`, `status` and one connection by hand.
 
 ## Changing the code

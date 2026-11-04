@@ -2,7 +2,7 @@
 
 This is everything the extension and the helper say to each other. The code that reads and writes it is `protocol.go` (framing) and `server.go` (the operations); the matching client is in the extension (closed source), and a small open one is the test client in `harness_test.go`.
 
-Protocol **1** goes with helper version `1.0.0`. The number only changes when an old extension and a new helper (or the other way round) can no longer understand each other ([Versions](#versions)).
+Protocol **1** is used by every helper version so far (`1.0.0` and `1.1.0`). The number only changes when an old extension and a new helper (or the other way round) can no longer understand each other ([Versions](#versions)).
 
 ## Transport
 
@@ -50,7 +50,7 @@ All paths are absolute and use `/`, on every kind of server. `session` is a name
 
 Always the first message. No other fields.
 
-Answer: `{"version": "1.0.0", "protocol": 1, "os": "windows", "arch": "amd64"}`.
+Answer: `{"version": "1.1.0", "protocol": 1, "os": "windows", "arch": "amd64"}`.
 
 The extension compares `protocol` with its own number. A helper with a lower number is "too old" (the extension asks the person for the newest helper); a higher number means "update the extension".
 
@@ -136,6 +136,55 @@ Each answers `{}`.
 
 `{"op": "cancel", "target": 7}` stops the request with that `id`. Whatever it was waiting for on the network is closed, so a cancel is never stuck behind a slow server. The cancelled request answers with the error code `cancelled`.
 
+### `sites` (helper 1.1.0 and newer)
+
+`{"op": "sites"}` asks for the servers that the person saved in other programs, so that the extension can offer them as new connections. The extension sends it only when the person presses **Look for saved servers** in its import window. There are no other fields and no `session` is needed.
+
+The helper looks, for the person who runs it and nobody else, in the places where these programs keep their lists:
+
+| Program | Where | On |
+| --- | --- | --- |
+| FileZilla | `sitemanager.xml` in the FileZilla folder: `%APPDATA%\FileZilla\` on Windows; `~/.config/filezilla/`, `~/.filezilla/` and, on macOS, `~/Library/Application Support/FileZilla/` on the others | every system |
+| WinSCP | the file `%APPDATA%\WinSCP.ini`, and the saved sessions in the registry of the current user (`HKEY_CURRENT_USER\Software\Martin Prikryl\WinSCP 2\Sessions`) | Windows |
+| Cyberduck | the `.duck` bookmark files in the `Bookmarks` folder of Cyberduck (`%APPDATA%\Cyberduck\Bookmarks`, `~/Library/Application Support/Cyberduck/Bookmarks`) | Windows and macOS |
+
+Answer: `{"sources": [...]}`, one entry for every program that exists on this kind of computer, found or not:
+
+```json
+{"sources": [
+  {"id": "filezilla", "name": "FileZilla", "found": true, "skipped": 1, "sites": [
+    {"name": "Studio website", "kind": "sftp", "host": "studio.example.net", "port": 2222, "user": "anna", "path": "/var/www/html", "group": "Clients"},
+    {"name": "Shop uploads", "kind": "ftp", "tls": "explicit", "host": "shop.example.net", "user": "anna", "path": "/uploads", "group": "Clients"}
+  ]},
+  {"id": "cyberduck", "name": "Cyberduck", "found": false, "skipped": 0, "sites": []}
+]}
+```
+
+| Key of a program | Meaning |
+| --- | --- |
+| `id`, `name` | The program: `filezilla`, `winscp` or `cyberduck`, and its name for a person. |
+| `found` | `true` when the program's list was there. |
+| `sites` | The servers the extension can open: FTP, FTPS and SFTP only. |
+| `skipped` | How many entries were left out because they are another kind (WebDAV, cloud storage, SCP, ...) or have no server. |
+| `truncated` | Only when there were more than 500 servers; the first 500 are sent. |
+| `error` | Only when the list is there but could not be read: a plain sentence, without a file name. |
+
+| Key of a server | Meaning |
+| --- | --- |
+| `name` | What the person called it. The host name when it has no name. |
+| `kind` | `ftp`, `ftps` (TLS from the first byte) or `sftp`. |
+| `tls` | FTP and FTPS only: `auto`, `explicit`, `implicit` or `none`, the same words `open` takes. Left out when the program does not say. |
+| `host`, `port` | The server. `port` is left out when the program uses the usual one. |
+| `user` | The user name, when the program has one. |
+| `path` | The start folder, when the program has one. |
+| `group` | The folder in which the program keeps the entry, for display only. |
+
+Every text is cut to 200 characters. A list file larger than 16 MiB is not read, and at most 1,000 Cyberduck bookmark files are read.
+
+**What is never in the answer, and never read:** a password (in any form: plain, encoded or hashed), the path or name of a key file, a passphrase. The code that reads the lists has no field for them, so they are thrown away while the file is read; the Go tests (`sites_test.go`) check that none of them appears in an answer. The helper never writes to the files of the other programs, and an answer goes only to the extension that asked.
+
+An older helper does not know `sites` and answers the generic error "The helper does not know the request ... Update the helper." The extension checks `version` first (1.1.0 or newer) and shows its "update the helper" screen instead.
+
 ## Errors
 
 ```json
@@ -171,15 +220,15 @@ The extension shows this, asks, remembers a "yes" (the fingerprint only) and rep
 
 ## Versions
 
-- `version` (`"1.0.0"`) is the version of the program. It is informational.
+- `version` (`"1.1.0"`) is the version of the program. It is informational, with one use: an extension that needs an operation which only newer helpers know (`sites` needs 1.1.0) compares it before it asks.
 - `protocol` (`1`) is the version of the messages. `protocolVersion` in `server.go` is the version of the messages. The extension carries the same number, and the maintainers' checks fail when the two differ.
-- **Raise the number only when the two sides can no longer understand each other.** Adding an optional field, a new operation or a new event does not need it, as long as an old side that does not know it still does the right thing. Removing or changing the meaning of a field does.
+- **Raise the number only when the two sides can no longer understand each other.** Adding an optional field, a new operation or a new event does not need it, as long as an old side that does not know it still does the right thing (`sites` was added to helper 1.1.0 this way: an older helper answers that it does not know the request). Removing or changing the meaning of a field does.
 
 ## A short session
 
 ```text
 extension -> {"id":1,"op":"hello"}
-helper    -> {"id":1,"ok":true,"version":"1.0.0","protocol":1,"os":"linux","arch":"amd64"}
+helper    -> {"id":1,"ok":true,"version":"1.1.0","protocol":1,"os":"linux","arch":"amd64"}
 extension -> {"id":2,"op":"open","session":"s1","kind":"ftp","host":"ftp.example.com","port":21,"user":"alice","password":"...","tls":"auto"}
 helper    -> {"id":2,"ok":true,"secure":true,"note":"Encrypted (TLS)","home":"/home/alice"}
 extension -> {"id":3,"op":"list","session":"s1","path":"/home/alice/"}

@@ -70,6 +70,19 @@ The helper turns what the network and the servers say into plain sentences. The 
 | The connection to the server was lost (...). | The network dropped, or the server closed an idle connection. Open it again. A download that breaks, or that the server ends with an error, is reported as an error, so do not trust that file. |
 | The server has no more room: ... | The disk or quota of the account is full. |
 
+### Import saved servers: what the window says
+
+The extension's start page has **Import your saved servers**. It asks the helper (1.1.0 or newer) to read the lists of FileZilla, WinSCP and Cyberduck. It never reads passwords: each imported connection asks for its password the first time you open it.
+
+| The window says | What it means | What to do |
+| --- | --- | --- |
+| **The helper program is too old to read the saved servers of other programs.** | Your helper is older than 1.1.0. | Install the newest helper ([INSTALLING.md](INSTALLING.md); the new copy replaces the old one), then press **Look for saved servers** again. |
+| **No saved servers were found.** | None of the usual places has a list for the user you are signed in as. The helper looks for FileZilla's `sitemanager.xml`, WinSCP's `WinSCP.ini` and registry sessions (Windows), and Cyberduck's bookmarks (Windows and macOS). | A portable copy that keeps its settings next to the program is not read. Add the server with **New connection** instead. |
+| **FileZilla could not be read** (or WinSCP, Cyberduck), with a sentence | The list is there but is damaged, too large (more than 16 MiB) or cannot be opened by your account. | Open the program once and save its list again, or add the servers by hand. |
+| **N saved entries are not FTP, FTPS or SFTP ... They are left out.** | WebDAV, cloud storage and SCP entries (and entries without a server) cannot be imported. | Add a WebDAV server with **New connection**. |
+| **Already in your list.** | A connection with the same address is saved. | Nothing: it is not added twice. |
+| **Your list is full (30 connections).** | The extension keeps at most 30. | Remove one first. |
+
 ### Folders do not open, or transfers hang (FTP)
 
 FTP sends the files over a second connection that the server opens in a way ("passive mode") a strict firewall or an old server may not follow. In the connection form, turn on **Old server mode** (the `noEpsv` field): the helper then uses the older passive command. If a download stops receiving data, it ends with a time-out after 90 seconds.

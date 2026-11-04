@@ -29,6 +29,8 @@ Chrome gives the host the address of the extension as the first argument (`chrom
 | `ftp.go` | The FTP and FTPS backend (library `jlaffaye/ftp`), with a small pool of connections per server. |
 | `sftp.go` | The SFTP backend (libraries `pkg/sftp` and `x/crypto/ssh`). |
 | `trust.go` | The identity checks: TLS certificates and SSH host keys. The program never decides alone. |
+| `sites.go` | The answer to `sites` (since 1.1.0): where FileZilla, WinSCP and Cyberduck keep their saved servers, and how each list is read. Only the fields of `fzServer`, `winscpFields` and `cyberduckFields` are read, so a password or a key file name has nowhere to go. It never writes. |
+| `sites_windows.go`, `sites_other.go` | Windows: the saved sessions of WinSCP in the registry of the current user (named values only). Elsewhere: nothing, because WinSCP has no registry there. |
 | `errors.go` | Turns the errors of the libraries into plain sentences with a code the extension understands. |
 | `testservers/` | FTP, FTPS, SFTP and WebDAV servers for the tests. They run on this computer on random ports. Not part of the program. |
 | `testserver/main.go` | Starts the test servers and prints their ports as one line of JSON (the real-Chrome tests of the extension use it). |
@@ -48,6 +50,8 @@ extension page <-onMessage----- Chrome <-stdout-- writer.send <- ok / fail / eve
 4. `handle` finds the session (`open` makes one, the other operations look it up by the `session` name) and calls the backend.
 5. Long operations send **events** first: `entries` for a listing, `meta` and `data` for a download, `ready` and `ack` for an upload. See the protocol.
 6. Everything that leaves the program goes through one `writer`, which locks and writes each message whole, because several requests answer at the same time. If writing fails, Chrome is gone, and the program cancels everything.
+
+`sites` is the one request that needs no session and no server: `handle` answers it with `discoverSites(currentSiteLocations())`. The locations come from the environment each time (`APPDATA`, the home folder, `XDG_CONFIG_HOME`), which is also how the tests point it at a folder of sample files and, on Windows, at a test registry key (`winscpRegistryRoot`).
 
 ## Flow control
 

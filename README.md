@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-extension-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/remote-files-browser-ftp/pckgpblcplbjffapabndpkhnhkioihjd)
 
-**The open source helper program of the Chrome extension [Remote Files Browser FTP by Rocuo](https://chromewebstore.google.com/detail/remote-files-browser-ftp/pckgpblcplbjffapabndpkhnhkioihjd).** It runs on your own computer and opens **FTP, FTPS and SFTP** connections for the extension, because Chrome does not let an extension open them itself.
+**The open source helper program of the Chrome extension [Remote Files Browser FTP by Rocuo](https://chromewebstore.google.com/detail/remote-files-browser-ftp/pckgpblcplbjffapabndpkhnhkioihjd).** It runs on your own computer and opens **FTP, FTPS and SFTP** connections for the extension, because Chrome does not let an extension open them itself. Since version 1.1.0 it can also read the servers that you saved in **FileZilla, WinSCP or Cyberduck**, when you press a button in the extension, so that you do not type them again (names, addresses, ports, user names and start folders; never a password).
 
 **Only the helper is open source.** The extension is free to use, but its source is closed. The helper is the part that runs outside the browser, on your computer, with your own rights, so it is the part you should be able to check: you can read every line of it, build it yourself, compare a download with the source, test it on your own system, and build on it. Why: [docs/WHY-OPEN-SOURCE.md](docs/WHY-OPEN-SOURCE.md).
 
@@ -33,8 +33,9 @@
 | A client: it connects **out** to the server you typed in. | A server. It listens on no port and accepts no connection from anyone. |
 | Run as you, without administrator rights. It writes only its own copy and its registration. | Something that needs an administrator, a driver or a change of the system. |
 | Silent towards Rocuo: it makes no connection except to the servers you open, sends no statistics and checks for no updates by itself. | A tracker. There is no account, no analytics and no server of Rocuo behind it. |
+| Able to read the servers saved in FileZilla, WinSCP and Cyberduck, **only when you press the import button** in the extension (since 1.1.0): names, addresses, ports, user names and start folders. | A reader of passwords. It never reads a password or a key file from those programs, and never writes to them. |
 
-It is written in Go, builds to one file per system (about 7 MB on Windows) and needs no other software. Version `1.0.0`, message version (protocol) `1`.
+It is written in Go, builds to one file per system (about 7 MB on Windows) and needs no other software. Version `1.1.0`, message version (protocol) `1`.
 
 ## How it works
 
@@ -49,7 +50,7 @@ flowchart LR
 
 1. The extension page asks Chrome to start the program named `com.rocuo.remote_files_helper`.
 2. Chrome looks the name up in a small registration file that the helper wrote when it was installed. **Chrome starts the program only for the extensions listed in that file.**
-3. The two talk in JSON messages ([the protocol](helper/docs/PROTOCOL.md)). The helper opens the connection to the server, lists folders, reads and writes files, and answers.
+3. The two talk in JSON messages ([the protocol](helper/docs/PROTOCOL.md)). The helper opens the connection to the server, lists folders, reads and writes files, and answers. When you press **Import saved servers** in the extension, it instead reads the lists that FileZilla, WinSCP and Cyberduck keep for you on the same computer, and answers with names, addresses, ports, user names and start folders (never a password).
 4. When the page closes, Chrome closes the pipe, and the helper ends its connections and exits.
 
 How the program is built, file by file: [helper/docs/ARCHITECTURE.md](helper/docs/ARCHITECTURE.md).
@@ -74,6 +75,7 @@ You should not have to take our word for it. These are the claims, and each one 
 - **It talks to the servers you open, and to no one else.** No web client, no update check, no statistics.
 - **It never decides about trust alone.** A new or changed TLS certificate or SSH host key is stopped and goes back to the person, with its SHA-256 fingerprint.
 - **A password** stays in memory for that connection only and is written nowhere.
+- **The saved servers of other programs are read only when you ask, and never with a password.** Only after you press the import button in the extension, and only names, addresses, ports, user names and start folders. The code that reads those lists has no field for a password or a key file, and the tests check that none reaches an answer.
 
 Every claim, with the file where you can verify it, is in [helper/SECURITY.md](helper/SECURITY.md). To check that a download is what this source builds: compare its checksum, run `gh attestation verify`, or build it yourself and get the same bytes ([docs/VERIFYING-DOWNLOADS.md](docs/VERIFYING-DOWNLOADS.md)). Report a security problem **privately**: [SECURITY.md](SECURITY.md).
 
@@ -81,7 +83,7 @@ Every claim, with the file where you can verify it, is in [helper/SECURITY.md](h
 
 | System | State of the helper |
 | --- | --- |
-| **Windows 11, 64-bit** (Intel/AMD) | **Run and tested:** the Go tests, and the maintainers' own tests of the extension with the helper in a real Chrome against real test servers. |
+| **Windows 11, 64-bit** (Intel/AMD) | **Run and tested:** the Go tests (51 for 1.1.0) and, for 1.0.0, the maintainers' own tests of the extension with the helper in a real Chrome against test servers. The import of saved servers (1.1.0) was tried only with **sample lists**, not with a real FileZilla, WinSCP or Cyberduck ([docs/TESTING.md](docs/TESTING.md#what-is-not-tested-by-a-script)). |
 | **Windows 10**, 64-bit | The same program. **Not tested separately.** Testers welcome. |
 | **macOS**, Apple silicon and Intel | Builds and passes `go vet`. GitHub Actions runs its Go tests on a macOS computer (an experimental job). **Never run on a Mac by the maintainers. Testers wanted.** |
 | **Linux**, 64-bit Intel/AMD and ARM | The same, on a Linux computer. **Never run on a Linux PC by the maintainers. Testers wanted.** |
@@ -113,6 +115,7 @@ This project is open so that people with other computers can help, and there is 
 - **Run `go test -count=1 ./...` in `helper/` on your system** and send the result. It is the quickest useful report.
 - **Check Edge, Brave and Chromium.** Tell us which of them really start the helper on your system.
 - **Bring an FTP, FTPS or SFTP server that answers in an odd way**, as a test case instead of a complaint.
+- **Try the import of saved servers** on a computer that has FileZilla, WinSCP or Cyberduck (above all on a Mac or a Linux PC) and tell us whether your list was read right. Describe the entry; never send the list file itself, because it can hold passwords.
 - **Signing and notarization:** a signing step for Windows (Authenticode) and macOS (notarization) in the release workflow, with the secrets kept by the publisher.
 - **A package for your system:** a Homebrew formula, a Scoop or winget manifest, a distribution package.
 - **Documents:** tell us where a page said something that was not true on your system.

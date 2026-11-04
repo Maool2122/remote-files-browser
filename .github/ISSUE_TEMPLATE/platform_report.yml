@@ -43,7 +43,7 @@ body:
     attributes:
       label: The helper file and its version
       description: The name of the file, where it came from (a release of this repository, or your own build) and the output of `version`.
-      placeholder: 'rocuo-files-helper-darwin-arm64 from the release v1.0.0, version 1.0.0'
+      placeholder: 'rocuo-files-helper-darwin-arm64 from the release v1.1.0, version 1.1.0'
     validations:
       required: true
   - type: dropdown

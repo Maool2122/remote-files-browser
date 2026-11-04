@@ -71,7 +71,7 @@ Running `install` again is safe: it updates the copy (a copy that is running is 
 ### `status`
 
 ```text
-Remote Files Browser helper 1.0.0 (windows/amd64)
+Remote Files Browser helper 1.1.0 (windows/amd64)
 This program: C:\Users\you\Downloads\rocuo-files-helper-windows-amd64.exe
 Registered for:
   Google Chrome -> C:\Users\you\AppData\Local\Rocuo\RemoteFilesHelper\com.rocuo.remote_files_helper.json
