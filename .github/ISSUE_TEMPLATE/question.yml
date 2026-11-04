@@ -1,0 +1,34 @@
+name: Question or help
+description: You are not sure how the helper works, or you cannot connect to a server
+title: 'Question: '
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please look at [docs/README.md](https://github.com/Maool2122/remote-files-browser/blob/main/docs/README.md) and at [helper/docs/TROUBLESHOOTING.md](https://github.com/Maool2122/remote-files-browser/blob/main/helper/docs/TROUBLESHOOTING.md) first. They answer most questions.
+
+        For help with the Chrome extension itself, use <https://rocuo.com/remote-files/support/>.
+
+        **Do not write passwords, user names, private server addresses or private file names here.** Anything you write in an issue is public.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What did you try, and what did you see?
+      description: The words of any message are the most useful part.
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Your setup
+      description: Helper version, operating system, browser, and the kind of place (FTP, FTPS, SFTP).
+      placeholder: 'Helper 1.0.0, Windows 11, Chrome 149, SFTP'
+    validations:
+      required: true

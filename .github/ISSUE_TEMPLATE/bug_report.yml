@@ -1,0 +1,118 @@
+name: Bug report
+description: Something in the helper program does not work as it should
+title: 'Bug: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to write this down.
+
+        This repository holds the **helper program** (FTP, FTPS and SFTP) of the Chrome extension Remote Files Browser FTP. The extension itself is closed source: for a problem with its screens or settings, use <https://rocuo.com/remote-files/support/>.
+
+        **Do not write passwords, user names, private server addresses or private file names here.** Replace them with made-up ones (`example.com`, `user`). Anything you write in an issue is public.
+
+        If you found a **security problem**, do not use this form. Read [SECURITY.md](https://github.com/Maool2122/remote-files-browser/blob/main/SECURITY.md) and report it in private.
+  - type: dropdown
+    id: part
+    attributes:
+      label: Which part does not work?
+      options:
+        - The helper program (install, start, FTP, FTPS or SFTP)
+        - The build, the tests or the release files
+        - The documents
+        - I do not know
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of place were you opening?
+      options:
+        - FTP
+        - FTPS
+        - SFTP
+        - Not about a place
+    validations:
+      required: true
+  - type: input
+    id: helper-version
+    attributes:
+      label: Helper version
+      description: Run `rocuo-files-helper version` (on Windows add `| Out-String` in PowerShell), or press Test the helper in the Settings of the extension.
+      placeholder: '1.0.0'
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version (if you use it with the extension)
+      description: Open chrome://extensions and look at the version of Remote Files Browser FTP.
+      placeholder: '1.1.0'
+  - type: dropdown
+    id: system
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows on ARM
+        - macOS, Apple silicon
+        - macOS, Intel
+        - Linux
+        - ChromeOS
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      description: Open chrome://version and copy the first line.
+      placeholder: 'Google Chrome 149.0.7827.22 (Official Build) (64-bit)'
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: What runs on the server side, if you know
+      description: For example FileZilla Server, OpenSSH, ProFTPD, vsftpd, a NAS from some maker, a hosting company. This helps a lot with FTP and SFTP.
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do?
+      description: Step by step, from the moment you installed or started the helper.
+      placeholder: |
+        1. I opened ...
+        2. I pressed ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead?
+      description: The words of the message, if there was one. A picture helps (hide anything private first).
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Extra output (optional)
+      description: The output of `rocuo-files-helper status`, and for a build problem the end of the output of the command. Check that nothing private is in it.
+      render: text
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you send
+      options:
+        - label: I removed passwords, private addresses and personal names from this report.
+          required: true
+        - label: I looked at the open issues and did not find the same problem.
+          required: true

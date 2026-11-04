@@ -1,0 +1,54 @@
+name: Security checks
+
+# Looks for known problems in the Go code and the libraries it uses, every Monday and whenever the Go module changes.
+# A red run here is a signal to update a library or Go itself; it does not mean that the helper is broken.
+# CodeQL (code scanning) is not in this file: switch on "Code scanning, default setup" in the settings of the repository (docs/RELEASING.md).
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - helper/go.mod
+      - helper/go.sum
+      - .github/workflows/security.yml
+  pull_request:
+    paths:
+      - helper/go.mod
+      - helper/go.sum
+      - .github/workflows/security.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  govulncheck:
+    name: Go (govulncheck)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The newest patch release of Go: an old one has known problems in its own standard library.
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache-dependency-path: helper/go.sum
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Look for known problems that the helper can reach
+        working-directory: helper
+        run: govulncheck ./...

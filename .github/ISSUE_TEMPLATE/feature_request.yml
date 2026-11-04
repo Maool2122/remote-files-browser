@@ -1,0 +1,49 @@
+name: Feature request
+description: An idea for something the helper program should do
+title: 'Idea: '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the idea. The helper is small on purpose: it has no server behind it, no account, no tracking, it opens no port and keeps no log. Ideas that keep that are the easiest to accept ([why](https://github.com/Maool2122/remote-files-browser/blob/main/docs/WHY-OPEN-SOURCE.md)).
+
+        This repository holds only the helper. The Chrome extension is closed source, so an idea for its screens cannot be built here: send it to <https://rocuo.com/remote-files/support/>.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do, and what is in the way?
+      description: Tell the problem first, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried or considered instead?
+  - type: dropdown
+    id: reach
+    attributes:
+      label: Would it need a new network connection, or let the helper read or write something new on the computer?
+      description: If you do not know, choose the last one.
+      options:
+        - 'No'
+        - 'Yes (please say which, and why, above)'
+        - I do not know
+    validations:
+      required: true
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you like to build it yourself?
+      options:
+        - 'No, I only have the idea'
+        - 'Yes, I would try (please read CONTRIBUTING.md first)'
+        - 'Yes, and I can test it on a system the maintainers do not use'
+    validations:
+      required: true

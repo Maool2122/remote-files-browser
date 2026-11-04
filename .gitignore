@@ -1,0 +1,20 @@
+# The helper programs that helper/build.mjs makes (and their checksums): build them, never commit them
+helper/dist/
+dist/
+*.exe
+
+# Local and secret files: never commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editors and systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp

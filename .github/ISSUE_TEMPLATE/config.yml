@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem (private)
+    url: https://github.com/Maool2122/remote-files-browser/security/advisories/new
+    about: Please do not open a public issue for a security problem. Use private vulnerability reporting here, or write to info@rocuo.com.
+  - name: Read the documents first
+    url: https://github.com/Maool2122/remote-files-browser/blob/main/docs/README.md
+    about: What the helper does, how it works, how to check a download, and the known limits.
+  - name: Help with the Chrome extension itself
+    url: https://rocuo.com/remote-files/support/
+    about: The extension is closed source and has no issues here. This repository holds only its helper program.

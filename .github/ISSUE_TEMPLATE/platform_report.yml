@@ -1,0 +1,100 @@
+name: Platform report (helper on macOS, Linux, Windows 10 or Windows on ARM)
+description: Tell us how the helper program worked, or did not, on your system
+title: 'Platform report: '
+labels: [platform-report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. A report from a system that the maintainers do not have is one of the most useful things you can give this project. **"It worked at once" is a good report.**
+
+        The steps are in [docs/PLATFORMS.md](https://github.com/Maool2122/remote-files-browser/blob/main/docs/PLATFORMS.md#try-the-helper-on-macos-or-linux). A system counts as tested when the whole list worked for two people. Use only the made-up test servers of the repository (`go run ./testserver` in `helper/`), not your real servers. **Do not paste passwords, private addresses or private file names.**
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - macOS, Apple silicon
+        - macOS, Intel
+        - Linux, 64-bit Intel/AMD
+        - Linux, ARM
+        - Windows on ARM
+        - Windows 10, Intel/AMD
+        - Windows 11, Intel/AMD
+        - Other (please say which below)
+    validations:
+      required: true
+  - type: input
+    id: details
+    attributes:
+      label: Version of the system and the computer
+      placeholder: 'macOS 15.1 on a MacBook Air M2 / Ubuntu 24.04 on a Raspberry Pi 5'
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      description: Chrome, Edge, Brave or Chromium. Open chrome://version and copy the first line.
+    validations:
+      required: true
+  - type: input
+    id: helper
+    attributes:
+      label: The helper file and its version
+      description: The name of the file, where it came from (a release of this repository, or your own build) and the output of `version`.
+      placeholder: 'rocuo-files-helper-darwin-arm64 from the release v1.0.0, version 1.0.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: go-test
+    attributes:
+      label: "`go test -count=1 ./...` in helper/"
+      options:
+        - I did not run it
+        - Passed
+        - Failed (please paste the end of the output below)
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: "`install`, then `status`"
+      options:
+        - Worked, and status shows my browser
+        - Worked, but status does not show my browser
+        - Failed (please paste the output below)
+    validations:
+      required: true
+  - type: dropdown
+    id: chrome-starts
+    attributes:
+      label: Does the browser start the helper? (Test the helper in Settings of the extension answers)
+      options:
+        - 'Yes'
+        - 'No'
+        - I did not get this far
+    validations:
+      required: true
+  - type: checkboxes
+    id: worked
+    attributes:
+      label: What worked against the test servers (tick everything that did)
+      options:
+        - label: FTP, list a folder
+        - label: FTP, download a file
+        - label: FTP, upload a file, new folder, rename, delete
+        - label: FTPS, list, download and upload (and the question about trusting the test certificate)
+        - label: SFTP, list, download and upload (and the question about trusting the host key)
+        - label: '`uninstall` removed everything'
+  - type: textarea
+    id: output
+    attributes:
+      label: Output of `status`
+      description: Check that it shows nothing you want to keep private (your user name is in the paths; replace it).
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: What failed, what the message said, what looked strange, what the documents got wrong.

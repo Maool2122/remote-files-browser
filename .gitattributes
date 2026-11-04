@@ -1,0 +1,8 @@
+# One line ending in the repository (LF), whatever system a contributor uses.
+* text=auto eol=lf
+
+# Files that are never text
+*.png binary
+*.webp binary
+*.ico binary
+*.exe binary

@@ -1,0 +1,130 @@
+name: CI
+
+# Checks every change. Windows is the system that the maintainers test on, so its job decides whether the run is green.
+# The Linux and macOS jobs are marked "experimental": they show problems, but do not turn the run red (docs/PLATFORMS.md).
+# This repository holds only the helper program, so there is no extension to build here (docs/WHY-OPEN-SOURCE.md).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  helper:
+    name: Helper (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Windows, os: windows-latest, experimental: false }
+          - { name: Linux, os: ubuntu-latest, experimental: true }
+          - { name: macOS, os: macos-latest, experimental: true }
+    defaults:
+      run:
+        working-directory: helper
+    steps:
+      - name: Get the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The newest patch release of Go: the Go standard library is part of the program (docs/VERIFYING-DOWNLOADS.md).
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache-dependency-path: helper/go.sum
+
+      - name: Show the Go version
+        run: go version
+
+      - name: gofmt
+        shell: bash
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::These files are not formatted. Run gofmt -w . in helper/ :"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      # The tests start their own FTP, FTPS, SFTP and WebDAV servers on 127.0.0.1. They use no outside network.
+      - name: go test
+        run: go test -count=1 ./...
+
+  helper-builds:
+    name: Helper for all six systems
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Get the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache-dependency-path: helper/go.sum
+
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Build the six programs
+        run: node helper/build.mjs
+
+      - name: Check that all six are there
+        run: |
+          ls -l helper/dist
+          test "$(ls helper/dist/rocuo-files-helper-* | wc -l)" -eq 6
+          test -s helper/dist/SHA256SUMS.txt
+
+      - name: Keep the programs for a week (so that a person can try them)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: helper-programs
+          path: helper/dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  docs:
+    name: Documents and scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Get the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      # Every link, anchor and version in the documents is true.
+      - name: Documents
+        run: node tools/check-docs.mjs
+
+      # Only the helper, its documents and its tools are here: nothing of the closed-source extension.
+      - name: Scope
+        run: node tools/check-scope.mjs

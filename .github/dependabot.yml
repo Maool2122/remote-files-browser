@@ -1,0 +1,25 @@
+# Dependabot opens a pull request when a Go module or a GitHub Action has a newer version.
+# Small updates are grouped into one pull request each week. CI runs on every one of them (a person still reads and merges it).
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: 'ci'
+
+  - package-ecosystem: gomod
+    directory: /helper
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      go-minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: 'deps(helper)'
