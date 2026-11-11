@@ -3,13 +3,13 @@ module rocuo.com/remote-files-helper
 go 1.26.0
 
 require (
-	github.com/fclairamb/ftpserverlib v0.32.4
+	github.com/fclairamb/ftpserverlib v0.33.0
 	github.com/jlaffaye/ftp v0.2.4
 	github.com/pkg/sftp v1.13.12
 	github.com/spf13/afero v1.15.0
 	golang.org/x/crypto v0.58.0
 	golang.org/x/net v0.62.0
-	golang.org/x/sys v0.49.0
+	golang.org/x/sys v0.50.0
 )
 
 require (
